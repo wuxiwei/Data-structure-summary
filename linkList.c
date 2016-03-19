@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<time.h>
 typedef struct node{
     int data;
     struct node *link;
@@ -31,10 +32,17 @@ int main(){
     /* showlist2(h); */
     /* invert(h); */
     /* showlist2(h); */
+    clock_t begin, duration;
+
     pa = createfirst();
     pb = createfirst();
+
+    begin = clock();    //开始时间
     pc = margelist1(pa, pb);
     showlist1(pc);
+
+    duration = clock() - begin;    //结束时间
+    printf( "运行时间大约为：%f\n", duration );
     return 0;
 }
 
