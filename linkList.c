@@ -4,30 +4,37 @@ typedef struct node{
     int data;
     struct node *link;
 }LNode;
+
 LNode * locatenode(LNode *h, int x);
 void insertlist(LNode *p, int x);
 void deletelist(LNode *p);
 LNode * createfirst();
 LNode * createtail();
 void delete(LNode *h, int x);
-void insertb1(LNode *h, int a, int b);
-void insertb2(LNode *h, int a, int b);
+void insertb1(LNode *h, int a, int b); //在头指针为h的带表头结点的单链表中结点a之前插入结点b，若无结点a，则插入到表尾。方法一
+void insertb2(LNode *h, int a, int b); //在头指针为h的带表头结点的单链表中结点a之前插入结点b，若无结点a，则插入到表尾。方法二
 void showlist1(LNode *h);
-void showlist2(LNode *h);
+void showlist2(LNode *h); 
 void invert(LNode *h);
+LNode * margelist1(LNode *pa, LNode *pb); //将两个升序排列的单链表（不带头指针）合并为一个按升序排列的单链表，方法一：不使用第三条链表空间
+LNode * margelist2(LNode *pa, LNode *pb); //将两个升序排列的单链表（不带头指针）合并为一个按升序排列的单链表，方法一：使用第三条链表空间
 
 int main(){
-    LNode *h;
+    LNode *pa, *pb, *pc;
     /* h = createfirst(); */
-    h = createtail();
-    showlist2(h);
-    delete(h, 4);   //删除结点值为4的结点
-    showlist2(h);
+    /* h = createtail(); */
+    /* showlist2(h); */
+    /* delete(h, 4);   //删除结点值为4的结点 */
+    /* showlist2(h); */
     /* insertb1(h, 5, 7); */
-    insertb2(h, 5, 7);
-    showlist2(h);
-    invert(h);
-    showlist2(h);
+    /* insertb2(h, 5, 7); */
+    /* showlist2(h); */
+    /* invert(h); */
+    /* showlist2(h); */
+    pa = createfirst();
+    pb = createfirst();
+    pc = margelist1(pa, pb);
+    showlist1(pc);
     return 0;
 }
 
@@ -199,4 +206,65 @@ void deleteprint(LNode *h){
             free(p);
         }
     }
+}
+
+LNode * margelist1(LNode *pa, LNode *pb){
+    //将两个升序排列的单链表（不带头指针）合并为一个按升序排列的单链表，方法一：不使用第三条链表空间
+    showlist1(pa);
+    showlist1(pb);
+    LNode *p, *q, *h;
+    h = q = pb;
+    while(pa != NULL && pb != NULL){
+        p = pa;
+        if(p->data < pb->data){
+            pa = pa->link;
+            p->link = pb;
+            if(pb == q){ q = pb = p; h = pb;}
+            else q->link = p;
+        }else{
+            q = pb;
+            pb = pb->link;
+        }
+    }
+    if(pb == NULL){
+        q->link = pa;
+    }
+    return h;
+}
+
+LNode * margelist2(LNode *pa, LNode *pb){
+    //将两个升序排列的单链表（不带头指针）合并为一个按升序排列的单链表，方法一：使用第三条链表空间
+    showlist1(pa);
+    showlist1(pb);
+    LNode *p, *q, *pc;
+    pc = (LNode *)malloc(sizeof(LNode));
+    p = pc;
+    while(pa != NULL && pb != NULL){
+        q = (LNode *)malloc(sizeof(LNode));
+        if(pb->data < pa->data){
+            q->data = pb->data;
+            pb = pb->link;
+        }else{
+            q->data = pa->data;
+            if(pa->data == pb->data) pb = pb->link;
+            pa = pa->link;
+        }
+        p->link = q;
+        p = q;
+    }
+    if(pa == NULL){
+        pa = pb;
+    }
+    while(pa != NULL){
+        q = (LNode *)malloc(sizeof(LNode));
+        q->data = pa->data;
+        pa = pa->link;
+        p->link = q;
+        p = q;
+    }
+    p->link = NULL;
+    p = pc;
+    pc = p->link;
+    free(p);
+    return pc;
 }
