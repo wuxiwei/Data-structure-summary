@@ -255,14 +255,35 @@ void insertdx(DLnode *h, int x){
 }
 
 //删除带表头结点的双向循环链表所有结点x;
-void deletedx(Dnode *h, int x){
-    Dnode *q, *p = h->next;
+void deletedx(DLnode *h, int x){
+    DLnode *q, *p = h->next;
     while(p != h){
         q = p; p = p->next;
         if(q -> data == x){
             q->prior->next = p;
             p->prior = q->prior;
             free(q);
+        }
+    }
+}
+
+//带表头的双向循环链表，实现所有负数结点放到正数结点之前
+void move(DLnode *h){
+    DLnode *p = h->next; *q = h->prior;
+    int x;
+    while(p != q&&q->next != p){
+        while(p->data < 0 && p != h){
+            p = p->next;
+        }
+        while(q->data > 0 && q != h){
+            q = q->prior;
+        }
+        if(p != q){
+            x = p->data;
+            p->data = q->data;
+            q->data = x;
+            p = p->next;
+            q = q->prior;
         }
     }
 }
