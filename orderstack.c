@@ -29,7 +29,7 @@ int stackfulls(SeqStack *s){
 
 void pushs(SeqStack *s, DataType x){
     //进栈
-    if(stackfulls){
+    if(stackfulls(s)){
         printf("over flow\n");
     }else{
         s->data[s->top++] = x;   //先赋值，后加
