@@ -1,0 +1,229 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAXV 100
+
+int visited[MAXV];
+
+typedef char DataType;
+typedef struct {
+	DataType data[MAXV];
+	int f,r;
+}CQueue;
+
+typedef struct {
+	char vexs[MAXV];
+	int edges[MAXV][MAXV];
+	int n,e;
+}MGraph;
+
+typedef struct node{
+	int adjvex;	//结点值 
+	struct node *next;	//结点链接 
+}ENode;	//结点 
+
+typedef struct{
+	char data;	//头指针值 
+	ENode *firstedge;	//头指针链接 
+}VNode; 
+
+typedef struct{
+	int n,e;	//顶点，边 
+	VNode adjlist[MAXV];	//整体链表 
+}ALGraph;
+
+//用连接表存无向图 
+void createalgraph(ALGraph *g){
+	ENode *p;
+	int i,j,k;
+	scanf("%d%d", &g->n, &g->e);
+	
+	for(k=0;k<g->n;k++){
+		getchar();
+		scanf("%c", &g->adjlist[k].data);
+		g->adjlist[k].firstedge = NULL;
+	}
+	
+	for(k=0;k<g->e;k++){
+		scanf("%d%d", &i,&j);
+		p = (ENode *)malloc(sizeof(ENode));
+		p->adjvex = j;p->next=g->adjlist[i].firstedge;
+		g->adjlist[i].firstedge = p; 
+		p=(ENode *)malloc(sizeof(ENode));
+		p->adjvex = i; p->next = g->adjlist[j].firstedge;
+		g->adjlist[j].firstedge = p; 
+	}
+}
+
+//用领接矩阵存有向图 
+void createmgraph(MGraph *g){
+	int i,j,k;
+	scanf("%d%d", &g->n,&g->e);
+	for(j=0;j<g->n;j++){
+		getchar();
+		scanf("%c", &g->vexs[j]);
+	}
+	for(i=0;i<g->n;i++){
+		for(j=0;j<g->n;j++){
+			g->edges[i][j] = 0;
+		}
+	}
+	for(k=0;k<g->e;k++){
+		scanf("%d%d", &i,&j);
+		g->edges[i][j] = 1;
+	}
+} 
+
+void display(MGraph *g){
+	int i,j;
+	for(i=0;i<g->n;i++){
+		for(j=0;j<g->n;j++){
+			printf("%d", g->edges[i][j]);
+		}
+		printf("\n");
+	}
+}
+
+//深度遍历邻接矩阵 
+void dfstravers(MGraph *g){
+	int i;
+	for(i = 0;i<g->n;i++){
+		visited[i] = 0;
+	}
+	for(i=0;i<g->n;i++){
+		if(visited[i] == 0) 
+			//dfsm(g,i);
+			bfsm(g, i);
+	}
+}
+
+void dfsm(MGraph *g, int i){
+	int j;
+	visited[i] = 1;
+	printf("<%c>", g->vexs[i]);
+	for(j = 0;j<g->n;j++){
+		if(g->edges[i][j] == 1 && visited[j] == 0){
+			dfsm(g,j);
+		}
+	}
+} 
+
+//深度遍历领接表
+void dfstra(ALGraph *g){
+	int i;
+	for(i = 0;i<g->n;i++){
+		visited[i] = 0;
+	}
+	for(i=0;i<g->n;i++){
+		if(visited[i] == 0) 
+			//dfs(g,i);
+			bfs(g,i);
+	}
+}
+
+void dfs(ALGraph *g,int i){
+	ENode *p;
+	printf("<%c>", g->adjlist[i].data);
+	visited[i] = 1;
+	p = g->adjlist[i].firstedge;
+	while(p){
+		if(visited[p->adjvex] == 0){
+			dfs(g, p->adjvex);
+		}
+		p = p->next;
+	} 
+} 
+
+
+CQueue * createemptycq(){
+	CQueue * cq;
+	cq = (CQueue *)malloc(sizeof(CQueue));
+	cq->f = 0;
+	cq->r = 0;
+	return cq;
+}
+
+int cqueueempty(CQueue *cq){
+	return (cq->f == cq->r);
+}
+
+int cqueuefull(CQueue *cq){
+	return ((cq->r+1)%MAXV == cq->f);
+}
+
+void encqueue(CQueue *cq, DataType x){
+	if(cqueuefull(cq)){
+		printf("overflow\n");
+	}else{
+		cq->r = (cq->r+1)%MAXV;
+		cq->data[cq->r] = x;
+	}
+}
+
+void delcqueue(CQueue *cq){
+	if(cqueueempty(cq)){
+		printf("underflow\n");
+	}else{
+		cq->f = (cq->f+1)%MAXV;
+	}
+}
+
+DataType cqueuefront(CQueue *cq){
+	return (cq->data[(cq->f+1)%MAXV]);
+}
+
+void bfsm(MGraph *g, int i){
+	int j,k;
+	CQueue *cq = createemptycq();
+	visited[i] = 1;
+	printf("<%c>", g->vexs[i]);
+	encqueue(cq, i);
+	while(!cqueueempty(cq)){
+		k = cqueuefront(cq);delcqueue(cq);
+		for(j = 0;j<g->n;j++){
+			if(visited[j] == 0 && g->edges[k][j] == 1){
+				printf("<%c>", g->vexs[j]);
+				visited[j] = 1;
+				encqueue(cq, j);
+			}
+		}
+	}
+}
+
+void bfs(ALGraph *g, int i){
+	CQueue *cq = createemptycq();
+	ENode *p;
+	int k;
+	printf("%c", g->adjlist[i].data);
+	visited[i] = 1;
+	encqueue(cq, i);
+	while(!cqueueempty(cq)){
+		k = cqueuefront(cq);
+		delcqueue(cq);
+		p = g->adjlist[k].firstedge;
+		while(p){
+			if(visited[p->adjvex] == 0){
+				printf("%c", g->adjlist[p->adjvex].data);
+				visited[p->adjvex] = 1;
+				encqueue(cq, p->adjvex);
+			}
+			p = p->next;
+		}
+	}
+}
+
+
+
+int main(){
+	int a = 0;
+	int *p;
+	p = &a;
+//	MGraph *g = (MGraph *)malloc(sizeof(MGraph));
+//	createmgraph(g);
+//	dfstravers(g);
+	ALGraph *g = (ALGraph *)malloc(sizeof(ALGraph));
+	createalgraph(g);
+	dfstra(g);
+	
+	return 1;
+}
